@@ -224,6 +224,7 @@ public abstract class RebalanceImpl {
             for (final Map.Entry<String, SubscriptionData> entry : subTable.entrySet()) {
                 final String topic = entry.getKey();
                 try {
+                    // 客户端根据topic负载均衡
                     this.rebalanceByTopic(topic, isOrder);
                 } catch (Throwable e) {
                     if (!topic.startsWith(MixAll.RETRY_GROUP_TOPIC_PREFIX)) {
@@ -260,6 +261,7 @@ public abstract class RebalanceImpl {
                 break;
             }
             case CLUSTERING: {
+                // 获取topic下的所有queue
                 Set<MessageQueue> mqSet = this.topicSubscribeInfoTable.get(topic);
                 List<String> cidAll = this.mQClientFactory.findConsumerIdList(topic, consumerGroup);
                 if (null == mqSet) {
@@ -278,11 +280,12 @@ public abstract class RebalanceImpl {
 
                     Collections.sort(mqAll);
                     Collections.sort(cidAll);
-
+                    // messageQueue的负载策略，有5种实现
                     AllocateMessageQueueStrategy strategy = this.allocateMessageQueueStrategy;
 
                     List<MessageQueue> allocateResult = null;
                     try {
+                        // 按负载均衡策略进行分配，返回当前消费者实际订阅的MessageQueue集合
                         allocateResult = strategy.allocate(
                             this.consumerGroup,
                             this.mQClientFactory.getClientId(),
