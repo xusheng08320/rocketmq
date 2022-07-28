@@ -125,6 +125,7 @@ public class BrokerOuterAPI {
 
         final List<RegisterBrokerResult> registerBrokerResultList = Lists.newArrayList();
         List<String> nameServerAddressList = this.remotingClient.getNameServerAddressList();
+        // 循环向namesrv注册broker信息
         if (nameServerAddressList != null && nameServerAddressList.size() > 0) {
 
             final RegisterBrokerRequestHeader requestHeader = new RegisterBrokerRequestHeader();

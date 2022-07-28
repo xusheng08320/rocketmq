@@ -886,7 +886,7 @@ public class BrokerController {
             handleSlaveSynchronize(messageStoreConfig.getBrokerRole());
             this.registerBrokerAll(true, false, true);
         }
-
+        // 每隔registerNameServerPeriod时间，向namesrv注册自己，registerNameServerPeriod在10-60之间
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

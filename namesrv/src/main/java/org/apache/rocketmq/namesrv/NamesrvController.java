@@ -74,7 +74,7 @@ public class NamesrvController {
     }
 
     public boolean initialize() {
-
+        // 加载kv配置
         this.kvConfigManager.load();
 
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
