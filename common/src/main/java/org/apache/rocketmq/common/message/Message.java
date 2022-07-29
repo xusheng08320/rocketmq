@@ -24,9 +24,11 @@ import java.util.Map;
 
 public class Message implements Serializable {
     private static final long serialVersionUID = 8445773977080406428L;
-
+    // 主题
     private String topic;
+    // org.apache.rocketmq.common.sysflag.MessageSysFlag
     private int flag;
+    // KEYS 用于消息检索，WAIT 是否等消息存储完成后再返回
     private Map<String, String> properties;
     private byte[] body;
     private String transactionId;
