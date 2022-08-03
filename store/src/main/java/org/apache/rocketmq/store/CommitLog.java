@@ -611,7 +611,7 @@ public class CommitLog {
             // global
             // 设置消息存储时间戳
             msg.setStoreTimestamp(beginLockTimestamp);
-
+            // 如果文件夹下没有文件，或者文件满了，就新建文件
             if (null == mappedFile || mappedFile.isFull()) {
                 mappedFile = this.mappedFileQueue.getLastMappedFile(0); // Mark: NewFile may be cause noise
             }
@@ -1273,6 +1273,7 @@ public class CommitLog {
             }
 
             // Transaction messages that require special handling
+            // 事务消息特殊处理
             final int tranType = MessageSysFlag.getTransactionValue(msgInner.getSysFlag());
             switch (tranType) {
                 // Prepared and Rollback message is not consumed, will not enter the
