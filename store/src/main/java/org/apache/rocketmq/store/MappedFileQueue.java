@@ -74,7 +74,7 @@ public class MappedFileQueue {
             }
         }
     }
-
+    // 根据消息存储时间戳查找MappedFile
     public MappedFile getMappedFileByTime(final long timestamp) {
         Object[] mfs = this.copyMappedFiles(0);
 
@@ -161,7 +161,7 @@ public class MappedFileQueue {
 
                 try {
                     MappedFile mappedFile = new MappedFile(file.getPath(), mappedFileSize);
-
+                    // 将wrotePosition、flushedPosition和committedPosition三个指针都设置为文件大小
                     mappedFile.setWrotePosition(this.mappedFileSize);
                     mappedFile.setFlushedPosition(this.mappedFileSize);
                     mappedFile.setCommittedPosition(this.mappedFileSize);
@@ -459,6 +459,7 @@ public class MappedFileQueue {
      * @param offset Offset.
      * @param returnFirstOnNotFound If the mapped file is not found, then return the first one.
      * @return Mapped file or null (when not found and returnFirstOnNotFound is <code>false</code>).
+     * 根据偏移量获取MappedFile，((offset/this.mappedFileSize) - (mappedFile.getFileFromOffset() / this.mappedFileSize))
      */
     public MappedFile findMappedFileByOffset(final long offset, final boolean returnFirstOnNotFound) {
         try {
