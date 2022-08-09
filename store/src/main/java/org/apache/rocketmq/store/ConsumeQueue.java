@@ -422,6 +422,17 @@ public class ConsumeQueue {
         this.defaultMessageStore.getRunningFlags().makeLogicsQueueError();
     }
 
+    /**
+     * 依次将消息偏移量、消息长度、tag hashcode写入到ByteBuffer中，
+     * 并根据consumeQueueOffset计算ConsumeQueue中的物理地址，
+     * 将内容追加到ConsumeQueue的内存映射文件中（只追击，不刷盘）
+     * ConsumeQueue的刷盘方式固定位异步刷盘
+     * @param offset
+     * @param size
+     * @param tagsCode
+     * @param cqOffset
+     * @return
+     */
     private boolean putMessagePositionInfo(final long offset, final int size, final long tagsCode,
         final long cqOffset) {
 

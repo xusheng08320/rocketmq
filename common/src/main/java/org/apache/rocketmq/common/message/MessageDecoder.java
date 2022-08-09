@@ -62,7 +62,7 @@ public class MessageDecoder {
         input.flip();
         int msgIDLength = addr.limit() == 8 ? 16 : 28;
         input.limit(msgIDLength);
-
+        // 4字节ip
         input.put(addr);
         input.putLong(offset);
 

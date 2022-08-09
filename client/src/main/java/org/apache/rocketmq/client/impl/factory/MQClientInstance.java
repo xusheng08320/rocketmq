@@ -234,8 +234,10 @@ public class MQClientInstance {
                         this.mQClientAPIImpl.fetchNameServerAddr();
                     }
                     // Start request-response channel
+                    // 启动netty
                     this.mQClientAPIImpl.start();
                     // Start various schedule tasks
+                    // 定时任务扫描namesrv地址是否发生变化
                     this.startScheduledTask();
                     // Start pull service
                     // 拉取消息

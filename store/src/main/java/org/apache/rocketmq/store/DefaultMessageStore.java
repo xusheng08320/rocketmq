@@ -63,31 +63,32 @@ import org.apache.rocketmq.store.stats.BrokerStatsManager;
 
 public class DefaultMessageStore implements MessageStore {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
-
+    // 消息存储配置属性
     private final MessageStoreConfig messageStoreConfig;
     // CommitLog
+    // 文件存储实现类
     private final CommitLog commitLog;
-
+    // 消息队列存储缓存表，按topic分组
     private final ConcurrentMap<String/* topic */, ConcurrentMap<Integer/* queueId */, ConsumeQueue>> consumeQueueTable;
-
+    // consumeQueue刷盘线程
     private final FlushConsumeQueueService flushConsumeQueueService;
-
+    // 清除CommitLog文件服务
     private final CleanCommitLogService cleanCommitLogService;
 
     private final CleanConsumeQueueService cleanConsumeQueueService;
-
+    // 索引服务
     private final IndexService indexService;
-
+    // 分配服务
     private final AllocateMappedFileService allocateMappedFileService;
-
+    // CommitLog消息分发，根据CommitLog文件构建ConsumeQueue、IndexFile文件
     private final ReputMessageService reputMessageService;
-
+    // 存储HA机制
     private final HAService haService;
 
     private final ScheduleMessageService scheduleMessageService;
 
     private final StoreStatsService storeStatsService;
-
+    // 消息堆内存缓存
     private final TransientStorePool transientStorePool;
 
     private final RunningFlags runningFlags = new RunningFlags();
@@ -100,11 +101,11 @@ public class DefaultMessageStore implements MessageStore {
     private final BrokerConfig brokerConfig;
 
     private volatile boolean shutdown = true;
-
+    // 文件刷盘检测点
     private StoreCheckpoint storeCheckpoint;
 
     private AtomicLong printTimes = new AtomicLong(0);
-
+    // CommitLog文件转发请求
     private final LinkedList<CommitLogDispatcher> dispatcherList;
 
     private RandomAccessFile lockFile;
@@ -172,11 +173,15 @@ public class DefaultMessageStore implements MessageStore {
 
     /**
      * @throws IOException
+     * 在启动的时候创建abort文件，在退出时通过注册JVM钩子函数删除abort文件
+     * 判断上次是否异常退出（存在abort文件）
+     * 如果存在需要进行修复
      */
     public boolean load() {
         boolean result = true;
 
         try {
+            // 判断上次是否异常退出
             boolean lastExitOK = !this.isTempFileExist();
             log.info("last shutdown {}", lastExitOK ? "normally" : "abnormally");
 
@@ -185,6 +190,7 @@ public class DefaultMessageStore implements MessageStore {
             }
 
             // load Commit Log
+            // 加载commitLog
             result = result && this.commitLog.load();
 
             // load Consume Queue
@@ -193,7 +199,7 @@ public class DefaultMessageStore implements MessageStore {
             if (result) {
                 this.storeCheckpoint =
                     new StoreCheckpoint(StorePathConfigHelper.getStoreCheckpoint(this.messageStoreConfig.getStorePathRootDir()));
-
+                // 加载索引文件
                 this.indexService.load(lastExitOK);
 
                 this.recover(lastExitOK);
@@ -393,6 +399,7 @@ public class DefaultMessageStore implements MessageStore {
         }
 
         long beginTime = this.getSystemClock().now();
+        // 消息存储
         PutMessageResult result = this.commitLog.putMessage(msg);
 
         long elapsedTime = this.getSystemClock().now() - beginTime;
@@ -1420,6 +1427,8 @@ public class DefaultMessageStore implements MessageStore {
     }
 
     public void doDispatch(DispatchRequest req) {
+        // CommitLogDispatcherBuildConsumeQueue 构建消息消费队列
+        // CommitLogDisPatcherBuildIndex 构建索引文件
         for (CommitLogDispatcher dispatcher : this.dispatcherList) {
             dispatcher.dispatch(req);
         }
@@ -1496,11 +1505,16 @@ public class DefaultMessageStore implements MessageStore {
         }
     }
 
+    /**
+     * 根据消息更新Index索引文件
+     */
     class CommitLogDispatcherBuildIndex implements CommitLogDispatcher {
 
         @Override
         public void dispatch(DispatchRequest request) {
+            // 是否开启配置，默认为true
             if (DefaultMessageStore.this.messageStoreConfig.isMessageIndexEnable()) {
+                // 构建hash索引
                 DefaultMessageStore.this.indexService.buildIndex(request);
             }
         }
@@ -1776,7 +1790,8 @@ public class DefaultMessageStore implements MessageStore {
     }
 
     class ReputMessageService extends ServiceThread {
-
+        // 该从哪个物理偏移量开始转发消息给ComsumeQueue和IndexFile
+        // 如果允许重复转发，为CommitLog的提交指针，如果不允许重复转发，为CommitLog的内存中最大偏移量
         private volatile long reputFromOffset = 0;
 
         public long getReputFromOffset() {
