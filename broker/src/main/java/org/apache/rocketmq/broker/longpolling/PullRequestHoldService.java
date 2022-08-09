@@ -68,13 +68,17 @@ public class PullRequestHoldService extends ServiceThread {
         log.info("{} service started", this.getServiceName());
         while (!this.isStopped()) {
             try {
+                // 是否开启长轮训，每5s尝试一次，判断消息是否到达
                 if (this.brokerController.getBrokerConfig().isLongPollingEnable()) {
                     this.waitForRunning(5 * 1000);
                 } else {
+                    // 没有开启长轮询，默认等待1s尝试一次
                     this.waitForRunning(this.brokerController.getBrokerConfig().getShortPollingTimeMills());
                 }
 
                 long beginLockTimestamp = this.systemClock.now();
+                // 校验主题与队列获取消息消费队列最大偏移量，如果该偏移量大于待拉取偏移量，
+                // 说明有新消息到达，调用notifyMessageArriving出发消息拉取
                 this.checkHoldRequest();
                 long costTime = this.systemClock.now() - beginLockTimestamp;
                 if (costTime > 5 * 1000) {
