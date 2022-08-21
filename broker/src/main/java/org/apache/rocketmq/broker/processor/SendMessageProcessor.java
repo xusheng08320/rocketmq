@@ -82,6 +82,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
                 if (requestHeader.isBatch()) {
                     response = this.sendBatchMessage(ctx, request, mqtraceContext, requestHeader);
                 } else {
+                    // 进行消息存储
                     response = this.sendMessage(ctx, request, mqtraceContext, requestHeader);
                 }
 
@@ -363,6 +364,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
             }
             putMessageResult = this.brokerController.getTransactionalMessageService().prepareMessage(msgInner);
         } else {
+            // 消息存储
             putMessageResult = this.brokerController.getMessageStore().putMessage(msgInner);
         }
 

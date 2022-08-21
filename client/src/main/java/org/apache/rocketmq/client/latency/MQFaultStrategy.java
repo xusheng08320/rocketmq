@@ -56,8 +56,10 @@ public class MQFaultStrategy {
     }
 
     public MessageQueue selectOneMessageQueue(final TopicPublishInfo tpInfo, final String lastBrokerName) {
+        // 开启了故障延迟
         if (this.sendLatencyFaultEnable) {
             try {
+                // 获取一个随机数放到threadLocal中，如果是同一个线程循环发送消息，相当于遍历队列
                 int index = tpInfo.getSendWhichQueue().getAndIncrement();
                 // 遍历所有队列，如果选择到一个可用的就返回
                 for (int i = 0; i < tpInfo.getMessageQueueList().size(); i++) {
@@ -70,7 +72,7 @@ public class MQFaultStrategy {
                             return mq;
                     }
                 }
-
+                // 遍历了所有队列但是没有可用的
                 final String notBestBroker = latencyFaultTolerance.pickOneAtLeast();
                 int writeQueueNums = tpInfo.getQueueIdByBroker(notBestBroker);
                 if (writeQueueNums > 0) {

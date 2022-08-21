@@ -88,7 +88,9 @@ public class TopicPublishInfo {
     }
 
     public MessageQueue selectOneMessageQueue() {
+        // 获取threadLocal中的随机数并+1
         int index = this.sendWhichQueue.getAndIncrement();
+        // 随机数%队列数量
         int pos = Math.abs(index) % this.messageQueueList.size();
         if (pos < 0)
             pos = 0;

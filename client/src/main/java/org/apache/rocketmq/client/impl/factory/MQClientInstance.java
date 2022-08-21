@@ -297,7 +297,7 @@ public class MQClientInstance {
                 }
             }
         }, 1000, this.clientConfig.getHeartbeatBrokerInterval(), TimeUnit.MILLISECONDS);
-
+        // 定时提交offset
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

@@ -81,7 +81,7 @@ public class NamesrvController {
 
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
-
+        // 注册请求处理器
         this.registerProcessor();
         // 每隔10秒扫描一次broker，移除处于未激活状态的broker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
@@ -148,7 +148,7 @@ public class NamesrvController {
             this.remotingServer.registerDefaultProcessor(new ClusterTestRequestProcessor(this, namesrvConfig.getProductEnvName()),
                 this.remotingExecutor);
         } else {
-
+            //
             this.remotingServer.registerDefaultProcessor(new DefaultRequestProcessor(this), this.remotingExecutor);
         }
     }
