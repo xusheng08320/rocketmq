@@ -263,6 +263,7 @@ public abstract class RebalanceImpl {
             case CLUSTERING: {
                 // 获取topic下的所有queue
                 Set<MessageQueue> mqSet = this.topicSubscribeInfoTable.get(topic);
+                // 消费者id
                 List<String> cidAll = this.mQClientFactory.findConsumerIdList(topic, consumerGroup);
                 if (null == mqSet) {
                     if (!topic.startsWith(MixAll.RETRY_GROUP_TOPIC_PREFIX)) {

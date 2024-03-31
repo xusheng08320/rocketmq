@@ -28,6 +28,31 @@ import org.apache.rocketmq.remoting.common.RemotingHelper;
 public class Producer {
     public static void main(String[] args) throws MQClientException, InterruptedException {
 
+        //defaultTest();
+        test1();
+    }
+
+    private static void test1() throws MQClientException, InterruptedException {
+        DefaultMQProducer producer = new DefaultMQProducer("please_rename_unique_group_name");
+        producer.setNamesrvAddr("127.0.0.1:9876");
+        producer.setSendMsgTimeout(8000);
+        producer.start();
+        try {
+            Message msg = new Message("TopicTest" /* Topic */,
+                    "TagA" /* Tag */,
+                    ("Hello RocketMQ " + 1).getBytes(RemotingHelper.DEFAULT_CHARSET) /* Message body */
+            );
+            SendResult sendResult = producer.send(msg);
+            System.out.printf("%s%n", sendResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Thread.sleep(1000);
+        }
+
+        producer.shutdown();
+    }
+
+    private static void defaultTest() throws MQClientException, InterruptedException {
         /*
          * Instantiate with a producer group name.
          */
